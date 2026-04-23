@@ -12,7 +12,6 @@
       padding: 24px;
       color: #1f2937;
     }
-
     .container {
       max-width: 720px;
       margin: 0 auto;
@@ -21,27 +20,22 @@
       padding: 24px;
       box-shadow: 0 10px 30px rgba(0,0,0,0.08);
     }
-
     h1 {
       margin-top: 0;
       font-size: 24px;
     }
-
     p {
       color: #6b7280;
       margin-bottom: 24px;
     }
-
     .field {
       margin-bottom: 18px;
     }
-
     label {
       display: block;
       font-weight: 700;
       margin-bottom: 8px;
     }
-
     input, select, button {
       width: 100%;
       padding: 12px 14px;
@@ -50,7 +44,6 @@
       font-size: 14px;
       box-sizing: border-box;
     }
-
     canvas {
       width: 100%;
       height: 220px;
@@ -60,41 +53,34 @@
       touch-action: none;
       display: block;
     }
-
     .signature-actions {
       display: flex;
       gap: 12px;
       margin-top: 10px;
     }
-
     .signature-actions button,
     .submit-btn {
       cursor: pointer;
       border: none;
       font-weight: 700;
     }
-
     .clear-btn {
       background: #e5e7eb;
       color: #111827;
     }
-
     .submit-btn {
       background: #dc2626;
       color: #fff;
       margin-top: 8px;
     }
-
     .submit-btn:disabled {
       opacity: 0.6;
       cursor: not-allowed;
     }
-
     .msg {
       margin-top: 18px;
       font-weight: 700;
     }
-
     .success { color: #15803d; }
     .error { color: #b91c1c; }
   </style>
@@ -106,8 +92,13 @@
 
     <form id="attendanceForm">
       <div class="field">
-        <label for="fullName">APELLIDOS Y NOMBRES</label>
-        <input type="text" id="fullName" name="fullName" required />
+        <label for="lastName">APELLIDOS</label>
+        <input type="text" id="lastName" name="lastName" required />
+      </div>
+
+      <div class="field">
+        <label for="firstName">NOMBRES</label>
+        <input type="text" id="firstName" name="firstName" required />
       </div>
 
       <div class="field">
@@ -118,34 +109,14 @@
       <div class="field">
         <label for="company">EMPRESA</label>
         <select id="company" name="company" required>
-          <option value="">Seleccione una empresa</option>
-          <option>A&S DISTRIBUCIONES E.I.R.L.</option>
-          <option>BUSINESS SERVICE CARGO S.A.</option>
-          <option>CHAMORRO TRANSPORTES SAN ANTONIO S.A.C.</option>
-          <option>CHAMORRO TRANSPORTES SAN ANTONIO SAC</option>
-          <option>CORP. DE TRANSPORTES HUAYRAZ PERU</option>
-          <option>CORPORACION ANDI E.I.R.L.</option>
-          <option>E & S CARGO S.A.C.</option>
-          <option>INDUAMERICA SERVICIOS LOGISTICOS S.</option>
-          <option>INDUAMERICA SERVICIOS LOGISTICOS SAC</option>
-          <option>JEDA SOLUTIONS E.I.R.L.</option>
-          <option>JEDA SOLUTIONS EIRL</option>
-          <option>LELY SPECIAL CORPORATION S.A.C</option>
-          <option>MUNDO LOGISTICO PERU SAC</option>
-          <option>SERVICIOS GENERALES RICPAL S.A.C.</option>
-          <option>TRANSPORTE LOGISTICO MLT S.A.C</option>
-          <option>TRANSPORTE LOGISTICO MLT S.A.C.</option>
-          <option>TRANSPORTES MAKOOL E.I.R.L.</option>
-          <option>TURISMO ESPINOZA EIRL</option>
+          <option value="">Cargando empresas...</option>
         </select>
       </div>
 
       <div class="field">
         <label for="position">PUESTO</label>
         <select id="position" name="position" required>
-          <option value="">Seleccione un puesto</option>
-          <option>Conductor</option>
-          <option>Auxiliar</option>
+          <option value="">Cargando cargos...</option>
         </select>
       </div>
 
@@ -163,7 +134,7 @@
   </div>
 
   <script>
-    const WEB_APP_URL = "PEGA_AQUI_TU_URL_DE_APPS_SCRIPT";
+    const WEB_APP_URL = "PEGA_AQUI_LA_URL_DE_TU_WEB_APP";
 
     const canvas = document.getElementById("signatureCanvas");
     const ctx = canvas.getContext("2d");
@@ -171,6 +142,8 @@
     const clearBtn = document.getElementById("clearSignature");
     const submitBtn = document.getElementById("submitBtn");
     const message = document.getElementById("message");
+    const companySelect = document.getElementById("company");
+    const positionSelect = document.getElementById("position");
 
     let drawing = false;
     let hasSignature = false;
@@ -180,6 +153,7 @@
       const rect = canvas.getBoundingClientRect();
       canvas.width = rect.width * ratio;
       canvas.height = rect.height * ratio;
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
       ctx.scale(ratio, ratio);
       ctx.lineWidth = 2;
       ctx.lineCap = "round";
@@ -193,10 +167,7 @@
       const rect = canvas.getBoundingClientRect();
       const clientX = e.touches ? e.touches[0].clientX : e.clientX;
       const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-      return {
-        x: clientX - rect.left,
-        y: clientY - rect.top
-      };
+      return { x: clientX - rect.left, y: clientY - rect.top };
     }
 
     function startDraw(e) {
@@ -221,30 +192,58 @@
       ctx.beginPath();
     }
 
-    clearBtn.addEventListener("click", () => {
+    function clearSignature() {
       const rect = canvas.getBoundingClientRect();
       ctx.clearRect(0, 0, rect.width, rect.height);
       ctx.fillStyle = "#ffffff";
       ctx.fillRect(0, 0, rect.width, rect.height);
       hasSignature = false;
-    });
-
-    canvas.addEventListener("mousedown", startDraw);
-    canvas.addEventListener("mousemove", draw);
-    canvas.addEventListener("mouseup", stopDraw);
-    canvas.addEventListener("mouseleave", stopDraw);
-
-    canvas.addEventListener("touchstart", startDraw, { passive: false });
-    canvas.addEventListener("touchmove", draw, { passive: false });
-    canvas.addEventListener("touchend", stopDraw);
-
-    window.addEventListener("resize", () => {
-      resizeCanvas();
-    });
+    }
 
     function showMessage(text, type) {
       message.textContent = text;
-      message.className = `msg ${type}`;
+      message.className = `msg ${type || ""}`;
+    }
+
+    function fillSelect(select, items, placeholder) {
+      select.innerHTML = "";
+      const first = document.createElement("option");
+      first.value = "";
+      first.textContent = placeholder;
+      select.appendChild(first);
+
+      items.forEach(item => {
+        const option = document.createElement("option");
+        option.value = item;
+        option.textContent = item;
+        select.appendChild(option);
+      });
+    }
+
+    async function postJson(payload) {
+      const response = await fetch(WEB_APP_URL, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify(payload)
+      });
+      return response.json();
+    }
+
+    async function loadBootstrap() {
+      try {
+        const result = await postJson({ action: "bootstrap" });
+
+        if (!result.ok) {
+          throw new Error(result.error || "No se pudo cargar listas.");
+        }
+
+        fillSelect(companySelect, result.empresas || [], "Seleccione una empresa");
+        fillSelect(positionSelect, result.cargos || [], "Seleccione un puesto");
+      } catch (error) {
+        fillSelect(companySelect, [], "Error cargando empresas");
+        fillSelect(positionSelect, [], "Error cargando cargos");
+        showMessage("No se pudieron cargar las listas maestras.", "error");
+      }
     }
 
     form.addEventListener("submit", async (e) => {
@@ -259,37 +258,47 @@
       showMessage("Enviando registro...", "");
 
       const payload = {
-        fullName: document.getElementById("fullName").value.trim(),
+        action: "createAttendance",
+        lastName: document.getElementById("lastName").value.trim(),
+        firstName: document.getElementById("firstName").value.trim(),
         dni: document.getElementById("dni").value.trim(),
-        company: document.getElementById("company").value,
-        position: document.getElementById("position").value,
+        company: companySelect.value,
+        position: positionSelect.value,
         signatureBase64: canvas.toDataURL("image/png")
       };
 
       try {
-        const response = await fetch(WEB_APP_URL, {
-          method: "POST",
-          headers: { "Content-Type": "text/plain;charset=utf-8" },
-          body: JSON.stringify(payload)
-        });
+        const result = await postJson(payload);
 
-        const result = await response.json();
-
-        if (result.ok) {
-          form.reset();
-          clearBtn.click();
-          showMessage("Asistencia registrada correctamente.", "success");
-        } else {
-          showMessage(result.error || "No se pudo registrar.", "error");
+        if (!result.ok) {
+          throw new Error(result.error || "No se pudo registrar.");
         }
-      } catch (err) {
-        showMessage("Error de conexión con el servidor.", "error");
+
+        form.reset();
+        clearSignature();
+        showMessage("Asistencia registrada correctamente.", "success");
+      } catch (error) {
+        showMessage(error.message || "Error de conexión con el servidor.", "error");
       } finally {
         submitBtn.disabled = false;
       }
     });
 
+    clearBtn.addEventListener("click", clearSignature);
+
+    canvas.addEventListener("mousedown", startDraw);
+    canvas.addEventListener("mousemove", draw);
+    canvas.addEventListener("mouseup", stopDraw);
+    canvas.addEventListener("mouseleave", stopDraw);
+
+    canvas.addEventListener("touchstart", startDraw, { passive: false });
+    canvas.addEventListener("touchmove", draw, { passive: false });
+    canvas.addEventListener("touchend", stopDraw);
+
+    window.addEventListener("resize", resizeCanvas);
+
     resizeCanvas();
+    loadBootstrap();
   </script>
 </body>
 </html>
