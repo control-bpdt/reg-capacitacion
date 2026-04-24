@@ -5,136 +5,234 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Registro de Asistencia</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f6f7fb;
-      margin: 0;
-      padding: 24px;
-      color: #1f2937;
-    } 
-    .container {
-      max-width: 720px;
-      margin: 0 auto;
-      background: #fff;
-      border-radius: 16px;
-      padding: 24px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+    :root {
+      --primary: #dc2626;
+      --primary-hover: #b91c1c;
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --text-main: #1e293b;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
     }
-    h1 {
-      margin-top: 0;
-      font-size: 24px;
-    }
-    p {
-      color: #6b7280;
-      margin-bottom: 24px;
-    }
-    .field {
-      margin-bottom: 18px;
-    }
-    label {
-      display: block;
-      font-weight: 700;
-      margin-bottom: 8px;
-    }
-    input, select, button {
-      width: 100%;
-      padding: 12px 14px;
-      border: 1px solid #d1d5db;
-      border-radius: 10px;
-      font-size: 14px;
+
+    /* Mejora global para que el padding no desborde los elementos */
+    * {
       box-sizing: border-box;
     }
-    canvas {
-      width: 100%;
-      height: 220px;
-      border: 2px dashed #cbd5e1;
-      border-radius: 12px;
-      background: #fff;
-      touch-action: none;
-      display: block;
+
+    body {
+      font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg);
+      margin: 0;
+      padding: 20px 12px; /* Margen externo reducido para móviles */
+      color: var(--text-main);
+      display: flex;
+      justify-content: center;
+      min-height: 100vh;
     }
+
+    .container {
+      width: 100%;
+      max-width: 550px;
+      background: var(--card-bg);
+      border-radius: 20px;
+      padding: 24px; /* Padding interno uniforme */
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+      margin: auto;
+    }
+
+    h1 {
+      margin: 0 0 8px 0;
+      font-size: 20px;
+      font-weight: 800;
+      color: #0f172a;
+      text-align: center;
+      text-transform: uppercase;
+    }
+
+    p {
+      color: var(--text-muted);
+      margin-bottom: 24px;
+      text-align: center;
+      font-size: 14px;
+    }
+
+    .field {
+      margin-bottom: 18px;
+      width: 100%; /* Asegura que el campo ocupe todo el ancho */
+    }
+
+    label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 6px;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.025em;
+      color: var(--text-muted);
+    }
+
+    input, select {
+      width: 100%;
+      display: block;
+      padding: 12px 14px;
+      border: 1.5px solid var(--border);
+      border-radius: 12px;
+      font-size: 16px;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      outline: none;
+      background-color: #fff;
+      text-transform: uppercase;
+    }
+
+    input::placeholder {
+      text-transform: none;
+    }
+
+    input:focus, select:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+    }
+
+    .signature-container {
+      position: relative;
+      background: #fff;
+      border: 2px dashed var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      width: 100%;
+    }
+
+    canvas {
+      display: block;
+      width: 100%;
+      height: 180px;
+      touch-action: none;
+      cursor: crosshair;
+    }
+
     .signature-actions {
       display: flex;
-      gap: 12px;
-      margin-top: 10px;
-    }
-    .signature-actions button,
-    .submit-btn {
-      cursor: pointer;
-      border: none;
-      font-weight: 700;
-    }
-    .clear-btn {
-      background: #e5e7eb;
-      color: #111827;
-    }
-    .submit-btn {
-      background: #dc2626;
-      color: #fff;
+      justify-content: flex-end;
       margin-top: 8px;
     }
+
+    .clear-btn {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      padding: 4px 8px;
+      text-decoration: underline;
+      text-transform: uppercase;
+    }
+
+    .submit-btn {
+      width: 100%;
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      padding: 14px;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.2s;
+      margin-top: 10px;
+      text-transform: uppercase;
+    }
+
+    .submit-btn:hover:not(:disabled) {
+      background: var(--primary-hover);
+    }
+
     .submit-btn:disabled {
-      opacity: 0.6;
+      background: #cbd5e1;
       cursor: not-allowed;
     }
+
     .msg {
-      margin-top: 18px;
-      font-weight: 700;
+      margin-top: 15px;
+      padding: 12px;
+      border-radius: 10px;
+      text-align: center;
+      font-weight: 600;
+      display: none;
+      text-transform: uppercase;
+      font-size: 12px;
     }
-    .success { color: #15803d; }
-    .error { color: #b91c1c; }
+
+    .msg.visible { display: block; }
+    .msg.success { background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; }
+    .msg.error { background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; }
+    .msg.loading { background: #eff6ff; color: #1e40af; border: 1px solid #bfdbfe; }
+
   </style>
 </head>
 <body>
+
   <div class="container">
-    <h1>Registro de Asistencia a Capacitación</h1>
-    <p>Cada participante debe completar sus datos y firmar digitalmente.</p>
+    <h1>Asistencia Capacitación</h1>
+    <p>Complete sus datos en mayúsculas y firme.</p>
 
     <form id="attendanceForm">
       <div class="field">
-        <label for="lastName">APELLIDOS</label>
-        <input type="text" id="lastName" name="lastName" required />
+        <label for="lastName">Apellidos</label>
+        <input type="text" id="lastName" name="lastName" placeholder="EJ. PÉREZ GARCÍA" required />
       </div>
 
       <div class="field">
-        <label for="firstName">NOMBRES</label>
-        <input type="text" id="firstName" name="firstName" required />
+        <label for="firstName">Nombres</label>
+        <input type="text" id="firstName" name="firstName" placeholder="EJ. JUAN ALBERTO" required />
       </div>
 
       <div class="field">
-        <label for="dni">DNI</label>
-        <input type="text" id="dni" name="dni" maxlength="12" required />
+        <label for="dni">DNI / CE</label>
+        <input 
+          type="tel" 
+          id="dni" 
+          name="dni" 
+          inputmode="numeric"
+          pattern="\d*"
+          maxlength="10" 
+          placeholder="SOLO NÚMEROS" 
+          required 
+        />
       </div>
 
       <div class="field">
-        <label for="company">EMPRESA</label>
+        <label for="company">Empresa</label>
         <select id="company" name="company" required>
-          <option value="">Cargando empresas...</option>
+          <option value="">CARGANDO EMPRESAS...</option>
         </select>
       </div>
 
       <div class="field">
-        <label for="position">PUESTO</label>
+        <label for="position">Puesto / Cargo</label>
         <select id="position" name="position" required>
-          <option value="">Cargando cargos...</option>
+          <option value="">CARGANDO CARGOS...</option>
         </select>
       </div>
 
       <div class="field">
-        <label>FIRMA</label>
-        <canvas id="signatureCanvas"></canvas>
+        <label>Firma Digital</label>
+        <div class="signature-container">
+          <canvas id="signatureCanvas"></canvas>
+        </div>
         <div class="signature-actions">
-          <button type="button" class="clear-btn" id="clearSignature">Limpiar firma</button>
+          <button type="button" class="clear-btn" id="clearSignature">LIMPIAR TABLERO</button>
         </div>
       </div>
 
-      <button type="submit" class="submit-btn" id="submitBtn">Registrar asistencia</button>
+      <button type="submit" class="submit-btn" id="submitBtn">ENVIAR REGISTRO</button>
       <div id="message" class="msg"></div>
     </form>
   </div>
 
   <script>
-    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzfCf3ZWUktTDdfNBrGsGEtyiE2P1MumuW2H2SnECb6xD2guO0lHEAYx0s_pwNfsQJ6-w/exec";
+    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzKK3HtJyD5ZeY9A0YzU54_FVf2pwLLOqVwvE28qddrKq-RwnU7vk3EMffGlHqhUNhoXw/exec";
 
     const canvas = document.getElementById("signatureCanvas");
     const ctx = canvas.getContext("2d");
@@ -144,83 +242,82 @@
     const message = document.getElementById("message");
     const companySelect = document.getElementById("company");
     const positionSelect = document.getElementById("position");
+    const dniInput = document.getElementById("dni");
 
     let drawing = false;
     let hasSignature = false;
 
-    function resizeCanvas() {
-      const ratio = Math.max(window.devicePixelRatio || 1, 1);
+    dniInput.addEventListener('input', function() {
+      this.value = this.value.replace(/[^0-9]/g, '');
+    });
+
+    function initCanvas() {
       const rect = canvas.getBoundingClientRect();
+      const ratio = window.devicePixelRatio || 1;
       canvas.width = rect.width * ratio;
       canvas.height = rect.height * ratio;
-      ctx.setTransform(1, 0, 0, 1, 0, 0);
       ctx.scale(ratio, ratio);
-      ctx.lineWidth = 2;
+      
+      ctx.lineWidth = 2.5;
       ctx.lineCap = "round";
-      ctx.strokeStyle = "#111827";
+      ctx.lineJoin = "round";
+      ctx.strokeStyle = "#0f172a";
+      
       ctx.fillStyle = "#ffffff";
       ctx.fillRect(0, 0, rect.width, rect.height);
-      hasSignature = false;
     }
 
-    function getPosition(e) {
+    function getPointerPos(e) {
       const rect = canvas.getBoundingClientRect();
       const clientX = e.touches ? e.touches[0].clientX : e.clientX;
       const clientY = e.touches ? e.touches[0].clientY : e.clientY;
       return { x: clientX - rect.left, y: clientY - rect.top };
     }
 
-    function startDraw(e) {
+    function startDrawing(e) {
       drawing = true;
-      const pos = getPosition(e);
+      const pos = getPointerPos(e);
       ctx.beginPath();
       ctx.moveTo(pos.x, pos.y);
-      e.preventDefault();
+      if (e.cancelable) e.preventDefault();
     }
 
     function draw(e) {
       if (!drawing) return;
-      const pos = getPosition(e);
+      const pos = getPointerPos(e);
       ctx.lineTo(pos.x, pos.y);
       ctx.stroke();
       hasSignature = true;
-      e.preventDefault();
+      if (e.cancelable) e.preventDefault();
     }
 
-    function stopDraw() {
+    function stopDrawing() {
       drawing = false;
-      ctx.beginPath();
     }
 
     function clearSignature() {
       const rect = canvas.getBoundingClientRect();
-      ctx.clearRect(0, 0, rect.width, rect.height);
       ctx.fillStyle = "#ffffff";
       ctx.fillRect(0, 0, rect.width, rect.height);
       hasSignature = false;
     }
 
-    function showMessage(text, type) {
+    function showStatus(text, type) {
       message.textContent = text;
-      message.className = `msg ${type || ""}`;
+      message.className = `msg visible ${type}`;
     }
 
     function fillSelect(select, items, placeholder) {
-      select.innerHTML = "";
-      const first = document.createElement("option");
-      first.value = "";
-      first.textContent = placeholder;
-      select.appendChild(first);
-
+      select.innerHTML = `<option value="">${placeholder}</option>`;
       items.forEach(item => {
-        const option = document.createElement("option");
-        option.value = item;
-        option.textContent = item;
-        select.appendChild(option);
+        const opt = document.createElement("option");
+        opt.value = item.toUpperCase();
+        opt.textContent = item.toUpperCase();
+        select.appendChild(opt);
       });
     }
 
-    async function postJson(payload) {
+    async function apiCall(payload) {
       const response = await fetch(WEB_APP_URL, {
         method: "POST",
         headers: { "Content-Type": "text/plain;charset=utf-8" },
@@ -229,90 +326,89 @@
       return response.json();
     }
 
-    async function loadBootstrap() {
-  try {
-    const result = await postJson({ action: "bootstrap" });
-
-    if (!result.ok) {
-      throw new Error(result.error || "No se pudo cargar listas.");
+    async function loadData() {
+      try {
+        const res = await apiCall({ action: "bootstrap" });
+        if (res.ok) {
+          fillSelect(companySelect, res.empresas || [], "SELECCIONE EMPRESA");
+          fillSelect(positionSelect, res.cargos || [], "SELECCIONE PUESTO");
+        } else {
+          throw new Error(res.error);
+        }
+      } catch (err) {
+        showStatus("ERROR AL CARGAR DATOS.", "error");
+      }
     }
 
-    fillSelect(companySelect, result.empresas || [], "Seleccione una empresa");
-    fillSelect(positionSelect, result.cargos || [], "Seleccione un puesto");
-  } catch (error) {
-    console.error("Error bootstrap:", error);
-    fillSelect(companySelect, [], "Error cargando empresas");
-    fillSelect(positionSelect, [], "Error cargando cargos");
-    showMessage("Error cargando listas: " + error.message, "error");
-  }
-}
-
-    function getCompressedSignatureBase64() {
-      const output = document.createElement("canvas");
-      output.width = 500;
-      output.height = 180;
-    
-      const outCtx = output.getContext("2d");
-      outCtx.fillStyle = "#ffffff";
-      outCtx.fillRect(0, 0, output.width, output.height);
-      outCtx.drawImage(canvas, 0, 0, output.width, output.height);
-    
-      return output.toDataURL("image/jpeg", 0.65);
+    function getSignatureImage() {
+      const tempCanvas = document.createElement("canvas");
+      tempCanvas.width = 400;
+      tempCanvas.height = 150;
+      const tCtx = tempCanvas.getContext("2d");
+      tCtx.fillStyle = "#ffffff";
+      tCtx.fillRect(0, 0, 400, 150);
+      tCtx.drawImage(canvas, 0, 0, tempCanvas.width, tempCanvas.height);
+      return tempCanvas.toDataURL("image/jpeg", 0.7);
     }
 
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
-
+      const dniVal = dniInput.value.trim();
+      if (dniVal.length < 8 || dniVal.length > 10) {
+        showStatus("DNI DEBE TENER 8-10 DÍGITOS.", "error");
+        return;
+      }
       if (!hasSignature) {
-        showMessage("La firma es obligatoria.", "error");
+        showStatus("LA FIRMA ES OBLIGATORIA.", "error");
         return;
       }
 
       submitBtn.disabled = true;
-      showMessage("Enviando registro...", "");
+      showStatus("ENVIANDO...", "loading");
 
       const payload = {
         action: "createAttendance",
-        lastName: document.getElementById("lastName").value.trim(),
-        firstName: document.getElementById("firstName").value.trim(),
-        dni: document.getElementById("dni").value.trim(),
-        company: companySelect.value,
-        position: positionSelect.value,
-        signatureBase64: getCompressedSignatureBase64()
+        lastName: document.getElementById("lastName").value.trim().toUpperCase(),
+        firstName: document.getElementById("firstName").value.trim().toUpperCase(),
+        dni: dniVal,
+        company: companySelect.value.toUpperCase(),
+        position: positionSelect.value.toUpperCase(),
+        signatureBase64: getSignatureImage()
       };
 
       try {
-        const result = await postJson(payload);
-
-        if (!result.ok) {
-          throw new Error(result.error || "No se pudo registrar.");
+        const result = await apiCall(payload);
+        if (result.ok) {
+          showStatus("REGISTRADO CON ÉXITO.", "success");
+          form.reset();
+          clearSignature();
+          setTimeout(() => message.className = "msg", 5000);
+        } else {
+          throw new Error(result.error);
         }
-
-        form.reset();
-        clearSignature();
-        showMessage("Asistencia registrada correctamente.", "success");
-      } catch (error) {
-        showMessage(error.message || "Error de conexión con el servidor.", "error");
+      } catch (err) {
+        showStatus("ERROR: " + err.message.toUpperCase(), "error");
       } finally {
         submitBtn.disabled = false;
       }
     });
 
     clearBtn.addEventListener("click", clearSignature);
-
-    canvas.addEventListener("mousedown", startDraw);
-    canvas.addEventListener("mousemove", draw);
-    canvas.addEventListener("mouseup", stopDraw);
-    canvas.addEventListener("mouseleave", stopDraw);
-
-    canvas.addEventListener("touchstart", startDraw, { passive: false });
+    canvas.addEventListener("mousedown", startDrawing);
+    window.addEventListener("mousemove", draw);
+    window.addEventListener("mouseup", stopDrawing);
+    canvas.addEventListener("touchstart", startDrawing, { passive: false });
     canvas.addEventListener("touchmove", draw, { passive: false });
-    canvas.addEventListener("touchend", stopDraw);
+    canvas.addEventListener("touchend", stopDrawing);
 
-    window.addEventListener("resize", resizeCanvas);
+    window.addEventListener("load", () => {
+      initCanvas();
+      loadData();
+    });
 
-    resizeCanvas();
-    loadBootstrap();
+    window.addEventListener("resize", () => {
+      initCanvas();
+    });
   </script>
 </body>
 </html>
