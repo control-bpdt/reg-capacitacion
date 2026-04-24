@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Registro de Asistencia</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f6f7fb;
+      margin: 0;
+      padding: 24px;
+      color: #1f2937;
+    }
+    .container {
+      max-width: 720px;
+      margin: 0 auto;
+      background: #fff;
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+    }
+    h1 {
+      margin-top: 0;
+      font-size: 24px;
+    }
+    p {
+      color: #6b7280;
+      margin-bottom: 24px;
+    }
+    .field {
+      margin-bottom: 18px;
+    }
+    label {
+      display: block;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    input, select, button {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1px solid #d1d5db;
+      border-radius: 10px;
+      font-size: 14px;
+      box-sizing: border-box;
+    }
+    canvas {
+      width: 100%;
+      height: 220px;
+      border: 2px dashed #cbd5e1;
+      border-radius: 12px;
+      background: #fff;
+      touch-action: none;
+      display: block;
+    }
+    .signature-actions {
+      display: flex;
+      gap: 12px;
+      margin-top: 10px;
+    }
+    .signature-actions button,
+    .submit-btn {
+      cursor: pointer;
+      border: none;
+      font-weight: 700;
+    }
+    .clear-btn {
+      background: #e5e7eb;
+      color: #111827;
+    }
+    .submit-btn {
+      background: #dc2626;
+      color: #fff;
+      margin-top: 8px;
+    }
+    .submit-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+    .msg {
+      margin-top: 18px;
+      font-weight: 700;
+    }
+    .success { color: #15803d; }
+    .error { color: #b91c1c; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Registro de Asistencia a Capacitación</h1>
+    <p>Cada participante debe completar sus datos y firmar digitalmente.</p>
+
+    <form id="attendanceForm">
+      <div class="field">
+        <label for="lastName">APELLIDOS</label>
+        <input type="text" id="lastName" name="lastName" required />
+      </div>
+
+      <div class="field">
+        <label for="firstName">NOMBRES</label>
+        <input type="text" id="firstName" name="firstName" required />
+      </div>
+
+      <div class="field">
+        <label for="dni">DNI</label>
+        <input type="text" id="dni" name="dni" maxlength="12" required />
+      </div>
+
+      <div class="field">
+        <label for="company">EMPRESA</label>
+        <select id="company" name="company" required>
+          <option value="">Cargando empresas...</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="position">PUESTO</label>
+        <select id="position" name="position" required>
+          <option value="">Cargando cargos...</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label>FIRMA</label>
+        <canvas id="signatureCanvas"></canvas>
+        <div class="signature-actions">
+          <button type="button" class="clear-btn" id="clearSignature">Limpiar firma</button>
+        </div>
+      </div>
+
+      <button type="submit" class="submit-btn" id="submitBtn">Registrar asistencia</button>
+      <div id="message" class="msg"></div>
+    </form>
+  </div>
+
+  <script>
+    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbz7IFDtt1izyBbVcZtSEIGghXGnBJm_ulSBLaFb90ttQbsWlcpNOhFLhRDxCDBp1F5o/exec";
+
+    const canvas = document.getElementById("signatureCanvas");
+    const ctx = canvas.getContext("2d");
+    const form = document.getElementById("attendanceForm");
+    const clearBtn = document.getElementById("clearSignature");
+    const submitBtn = document.getElementById("submitBtn");
+    const message = document.getElementById("message");
+    const companySelect = document.getElementById("company");
+    const positionSelect = document.getElementById("position");
+
+    let drawing = false;
+    let hasSignature = false;
+
+    function resizeCanvas() {
+      const ratio = Math.max(window.devicePixelRatio || 1, 1);
+      const rect = canvas.getBoundingClientRect();
+      canvas.width = rect.width * ratio;
+      canvas.height = rect.height * ratio;
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      ctx.scale(ratio, ratio);
+      ctx.lineWidth = 2;
+      ctx.lineCap = "round";
+      ctx.strokeStyle = "#111827";
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(0, 0, rect.width, rect.height);
+      hasSignature = false;
+    }
+
+    function getPosition(e) {
+      const rect = canvas.getBoundingClientRect();
+      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+      const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+      return { x: clientX - rect.left, y: clientY - rect.top };
+    }
+
+    function startDraw(e) {
+      drawing = true;
+      const pos = getPosition(e);
+      ctx.beginPath();
+      ctx.moveTo(pos.x, pos.y);
+      e.preventDefault();
+    }
+
+    function draw(e) {
+      if (!drawing) return;
+      const pos = getPosition(e);
+      ctx.lineTo(pos.x, pos.y);
+      ctx.stroke();
+      hasSignature = true;
+      e.preventDefault();
+    }
+
+    function stopDraw() {
+      drawing = false;
+      ctx.beginPath();
+    }
+
+    function clearSignature() {
+      const rect = canvas.getBoundingClientRect();
+      ctx.clearRect(0, 0, rect.width, rect.height);
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(0, 0, rect.width, rect.height);
+      hasSignature = false;
+    }
+
+    function showMessage(text, type) {
+      message.textContent = text;
+      message.className = `msg ${type || ""}`;
+    }
+
+    function fillSelect(select, items, placeholder) {
+      select.innerHTML = "";
+      const first = document.createElement("option");
+      first.value = "";
+      first.textContent = placeholder;
+      select.appendChild(first);
+
+      items.forEach(item => {
+        const option = document.createElement("option");
+        option.value = item;
+        option.textContent = item;
+        select.appendChild(option);
+      });
+    }
+
+    async function postJson(payload) {
+      const response = await fetch(WEB_APP_URL, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify(payload)
+      });
+      return response.json();
+    }
+
+    async function loadBootstrap() {
+  try {
+    const result = await postJson({ action: "bootstrap" });
+
+    if (!result.ok) {
+      throw new Error(result.error || "No se pudo cargar listas.");
+    }
+
+    fillSelect(companySelect, result.empresas || [], "Seleccione una empresa");
+    fillSelect(positionSelect, result.cargos || [], "Seleccione un puesto");
+  } catch (error) {
+    console.error("Error bootstrap:", error);
+    fillSelect(companySelect, [], "Error cargando empresas");
+    fillSelect(positionSelect, [], "Error cargando cargos");
+    showMessage("Error cargando listas: " + error.message, "error");
+  }
+}
+
+    function getCompressedSignatureBase64() {
+      const output = document.createElement("canvas");
+      output.width = 500;
+      output.height = 180;
+    
+      const outCtx = output.getContext("2d");
+      outCtx.fillStyle = "#ffffff";
+      outCtx.fillRect(0, 0, output.width, output.height);
+      outCtx.drawImage(canvas, 0, 0, output.width, output.height);
+    
+      return output.toDataURL("image/jpeg", 0.65);
+    }
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      if (!hasSignature) {
+        showMessage("La firma es obligatoria.", "error");
+        return;
+      }
+
+      submitBtn.disabled = true;
+      showMessage("Enviando registro...", "");
+
+      const payload = {
+        action: "createAttendance",
+        lastName: document.getElementById("lastName").value.trim(),
+        firstName: document.getElementById("firstName").value.trim(),
+        dni: document.getElementById("dni").value.trim(),
+        company: companySelect.value,
+        position: positionSelect.value,
+        signatureBase64: getCompressedSignatureBase64()
+      };
+
+      try {
+        const result = await postJson(payload);
+
+        if (!result.ok) {
+          throw new Error(result.error || "No se pudo registrar.");
+        }
+
+        form.reset();
+        clearSignature();
+        showMessage("Asistencia registrada correctamente.", "success");
+      } catch (error) {
+        showMessage(error.message || "Error de conexión con el servidor.", "error");
+      } finally {
+        submitBtn.disabled = false;
+      }
+    });
+
+    clearBtn.addEventListener("click", clearSignature);
+
+    canvas.addEventListener("mousedown", startDraw);
+    canvas.addEventListener("mousemove", draw);
+    canvas.addEventListener("mouseup", stopDraw);
+    canvas.addEventListener("mouseleave", stopDraw);
+
+    canvas.addEventListener("touchstart", startDraw, { passive: false });
+    canvas.addEventListener("touchmove", draw, { passive: false });
+    canvas.addEventListener("touchend", stopDraw);
+
+    window.addEventListener("resize", resizeCanvas);
+
+    resizeCanvas();
+    loadBootstrap();
+  </script>
+</body>
+</html>
